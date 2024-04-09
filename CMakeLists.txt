@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.23)
-project(beebem VERSION 0.0.13)
+project(beebem VERSION 0.0.15)
 
 option(BEEBEM_WITH_DEBUGGER "compile with additional logging" OFF)
 option(BEEBEM_ENABLE_ECONET "compile with econet" ON)
