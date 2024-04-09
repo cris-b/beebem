@@ -329,21 +329,18 @@ static void ProcessGUIOption(EG_Widget *widget_ptr, void *user_ptr) {
 
 // TEMP FILE SELECTOR ======================================================
 
-static char *gtk_file_selector_filename_ptr;
+static char *gtk_file_chooser_filename_ptr;
 static GtkWidget *filew;
 int got_file;
 bool was_full_screen = false;
 
 /* Get the selected filename and print it to the console */
-static void file_ok_sel(GtkWidget *w, GtkFileSelection *fs) {
-  // g_print ("%s\n", gtk_file_selection_get_filename (GTK_FILE_SELECTION
-  // (fs)));
-  strcpy(gtk_file_selector_filename_ptr,
-         gtk_file_selection_get_filename(GTK_FILE_SELECTION(fs)));
+static void file_ok_sel(GtkWidget *w) {
+  strcpy(gtk_file_chooser_filename_ptr,
+         gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(w)));
 
   got_file = true;
 
-  gtk_widget_destroy(filew);
   if (was_full_screen == true) {
     ToggleFullscreen();
     EG_TickBox_Tick(gui.fullscreen_widget_ptr);
@@ -367,25 +364,29 @@ int Save_GTK_File_Selector(char *filename_ptr) {
 
   gtk_init(&__argc, &__argv);
 
-  gtk_file_selector_filename_ptr = filename_ptr;
+  gtk_file_chooser_filename_ptr = filename_ptr;
 
-  filew = gtk_file_selection_new("File selection");
-
-  g_signal_connect(G_OBJECT(filew), "destroy", G_CALLBACK(gtk_main_quit), NULL);
-  g_signal_connect(G_OBJECT(GTK_FILE_SELECTION(filew)->ok_button), "clicked",
-                   G_CALLBACK(file_ok_sel), (gpointer)filew);
-  g_signal_connect_swapped(G_OBJECT(GTK_FILE_SELECTION(filew)->cancel_button),
-                           "clicked", G_CALLBACK(gtk_widget_destroy),
-                           G_OBJECT(filew));
+  filew = gtk_file_chooser_dialog_new ("File selection",NULL,GTK_FILE_CHOOSER_ACTION_SAVE, 
+                                                             "_Cancel", GTK_RESPONSE_CANCEL,
+                                                             "_Save", GTK_RESPONSE_ACCEPT,
+                                                             NULL);
 
   if (strlen(filename_ptr) > 0)
-    gtk_file_selection_set_filename(GTK_FILE_SELECTION(filew), filename_ptr);
+    gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(filew), filename_ptr);
   else
-    gtk_file_selection_set_filename(GTK_FILE_SELECTION(filew),
+    gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(filew),
                                     DATA_DIR "/media/discs/");
 
-  gtk_widget_show(filew);
-  gtk_main();
+  if(gtk_dialog_run (GTK_DIALOG(filew)) == GTK_RESPONSE_ACCEPT)
+  {
+      file_ok_sel(filew);
+  }
+
+  gtk_widget_hide( GTK_WIDGET(filew) );
+
+  while ( gtk_events_pending() ) gtk_main_iteration();
+
+  gtk_widget_destroy(filew);
 
   was_full_screen = false;
   return (got_file);
@@ -409,25 +410,29 @@ int Open_GTK_File_Selector(char *filename_ptr) {
 
   gtk_init(&__argc, &__argv);
 
-  gtk_file_selector_filename_ptr = filename_ptr;
+  gtk_file_chooser_filename_ptr = filename_ptr;
 
-  filew = gtk_file_selection_new("File selection");
-
-  g_signal_connect(G_OBJECT(filew), "destroy", G_CALLBACK(gtk_main_quit), NULL);
-  g_signal_connect(G_OBJECT(GTK_FILE_SELECTION(filew)->ok_button), "clicked",
-                   G_CALLBACK(file_ok_sel), (gpointer)filew);
-  g_signal_connect_swapped(G_OBJECT(GTK_FILE_SELECTION(filew)->cancel_button),
-                           "clicked", G_CALLBACK(gtk_widget_destroy),
-                           G_OBJECT(filew));
+  filew = gtk_file_chooser_dialog_new ("File selection",NULL,GTK_FILE_CHOOSER_ACTION_OPEN,
+                                                             "_Cancel", GTK_RESPONSE_CANCEL,
+                                                             "_Open", GTK_RESPONSE_ACCEPT,
+                                       NULL);
 
   if (strlen(filename_ptr) > 0)
-    gtk_file_selection_set_filename(GTK_FILE_SELECTION(filew), filename_ptr);
+    gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(filew), filename_ptr);
   else
-    gtk_file_selection_set_filename(GTK_FILE_SELECTION(filew),
+    gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(filew),
                                     DATA_DIR "/media/discs/");
 
-  gtk_widget_show(filew);
-  gtk_main();
+  if(gtk_dialog_run (GTK_DIALOG(filew)) == GTK_RESPONSE_ACCEPT)
+  {
+      file_ok_sel(filew);
+  }
+
+  gtk_widget_hide( GTK_WIDGET(filew) ); 
+
+  while ( gtk_events_pending() ) gtk_main_iteration();
+
+  gtk_widget_destroy(filew);
 
   was_full_screen = false;
   return (got_file);

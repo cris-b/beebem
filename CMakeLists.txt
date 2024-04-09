@@ -29,8 +29,10 @@ endif()
 
 find_package(SDL REQUIRED)
 
-find_package(GTK2 REQUIRED)
-message(STATUS "found GTK2 version ${GTK2_VERSION}")
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(GTK3 REQUIRED gtk+-3.0)
+
+message(STATUS "found GTK3 version ${GTK3_VERSION}")
 
 add_subdirectory(src)
 add_subdirectory(data)
